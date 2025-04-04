@@ -20,11 +20,25 @@ public class User implements UserDetails {
 
     @Column(unique = true)
     private String username;
-
+    private String email;
     private String password;
 
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    @ManyToOne
+    @JoinColumn(name = "membership_id")
+    private Membership membership;
+
+    @OneToMany(mappedBy = "user")
+    private List<Booking> bookings;
+
+    @OneToMany(mappedBy = "user")
+    private List<Review> reviews;
+
+    @OneToMany(mappedBy = "user")
+    private List<Order> orders;
+}
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -43,4 +57,5 @@ public class User implements UserDetails {
 
     @Override
     public boolean isEnabled() { return true; }
+
 }
