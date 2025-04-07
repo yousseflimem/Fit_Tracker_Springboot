@@ -38,7 +38,6 @@ public class User implements UserDetails {
 
     @OneToMany(mappedBy = "user")
     private List<Order> orders;
-}
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -59,3 +58,4 @@ public class User implements UserDetails {
     public boolean isEnabled() { return true; }
 
 }
+
