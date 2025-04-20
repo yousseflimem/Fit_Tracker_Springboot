@@ -1,13 +1,19 @@
 package com.example.demo.entity;
 
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
+@Entity
+@Table(name = "memberships")
+@Getter
+@Setter
 public class Membership {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long membershipId;
-    private String type;
-    private double price;
-    private int duration;
+    private Long id;
 
-    @OneToMany(mappedBy = "membership")
-    private List<User> users;
+    private String type;      // e.g., "Basic", "Premium"
+    private Double price;
+    private Integer duration; // Duration in days
 }

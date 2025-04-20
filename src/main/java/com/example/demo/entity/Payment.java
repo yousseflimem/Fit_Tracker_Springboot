@@ -1,22 +1,27 @@
 package com.example.demo.entity;
 
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+import java.util.Date;
+
+@Entity
+@Table(name = "payments")
+@Getter
+@Setter
 public class Payment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long paymentId;
-    private double amount;
-    private LocalDateTime paymentDate;
+    private Long id;
+
+    private Double amount;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date paymentDate;
     private String status;
 
-    @OneToOne
-    @JoinColumn(name = "booking_id")
-    private Booking booking;
-
+    // Payment for one Order (One-to-One)
     @OneToOne
     @JoinColumn(name = "order_id")
     private Order order;
-
-    @OneToOne
-    @JoinColumn(name = "membership_id")
-    private Membership membership;
 }

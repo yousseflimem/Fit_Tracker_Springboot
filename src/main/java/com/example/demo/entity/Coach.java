@@ -1,21 +1,20 @@
 package com.example.demo.entity;
 
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
+@Entity
+@Table(name = "coaches")
+@Getter
+@Setter
 public class Coach {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long coachId;
-    private String name;
-    private int experience;
+    private Long id;
 
-    @ElementCollection
-    private List<String> specialties;
-
+    private String username;
+    private String password;
     private String bio;
-
-    @OneToMany(mappedBy = "coach")
-    private List<Workout> workouts;
-
-    @OneToMany(mappedBy = "coach")
-    private List<GymClass> gymClasses;
+    private Double rating;
 }
-
