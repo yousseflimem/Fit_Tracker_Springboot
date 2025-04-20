@@ -1,11 +1,19 @@
 package com.example.demo.entity;
 
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
+@Entity
+@Table(name = "gym_products")
+@Getter
+@Setter
 public class GymProduct {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long productId;
+    private Long id;
+
     private String name;
-    private double price;
-    private String description;
-    private int stock;
+    private Double price;
+    private Integer stock;
 }

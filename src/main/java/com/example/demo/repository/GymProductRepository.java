@@ -1,4 +1,7 @@
 package com.example.demo.repository;
 
-public interface GymProductRepository {
+import com.example.demo.entity.GymProduct;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface GymProductRepository extends JpaRepository<GymProduct, Long> {
 }

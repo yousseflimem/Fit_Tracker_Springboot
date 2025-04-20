@@ -20,22 +20,27 @@ public class User implements UserDetails {
 
     @Column(unique = true)
     private String username;
+
     private String email;
     private String password;
 
     @Enumerated(EnumType.STRING)
     private Role role;
 
+    // Many users can subscribe to one Membership
     @ManyToOne
     @JoinColumn(name = "membership_id")
     private Membership membership;
 
+    // One user can have many bookings
     @OneToMany(mappedBy = "user")
     private List<Booking> bookings;
 
+    // One user can have many reviews
     @OneToMany(mappedBy = "user")
     private List<Review> reviews;
 
+    // One user can place many orders
     @OneToMany(mappedBy = "user")
     private List<Order> orders;
 
@@ -46,16 +51,22 @@ public class User implements UserDetails {
     }
 
     @Override
-    public boolean isAccountNonExpired() { return true; }
+    public boolean isAccountNonExpired() {
+        return true;
+    }
 
     @Override
-    public boolean isAccountNonLocked() { return true; }
+    public boolean isAccountNonLocked() {
+        return true;
+    }
 
     @Override
-    public boolean isCredentialsNonExpired() { return true; }
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
 
     @Override
-    public boolean isEnabled() { return true; }
-
+    public boolean isEnabled() {
+        return true;
+    }
 }
-
