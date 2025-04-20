@@ -35,4 +35,9 @@ public class BookingController {
     public void deleteBooking(@PathVariable Long id) {
         bookingRepository.deleteById(id);
     }
+
+    @GetMapping("/user/{userId}")
+    public List<Booking> getBookingsByUserId(@PathVariable Long userId) {
+        return bookingRepository.findByUserId(userId);
+    }
 }
