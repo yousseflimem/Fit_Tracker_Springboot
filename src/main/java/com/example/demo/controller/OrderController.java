@@ -35,4 +35,9 @@ public class OrderController {
     public void deleteOrder(@PathVariable Long id) {
         orderRepository.deleteById(id);
     }
+
+    @GetMapping("/user/{userId}")
+    public List<Order> getOrdersByUserId(@PathVariable Long userId) {
+        return orderRepository.findOrdersByUserId(userId);
+    }
 }
