@@ -1,7 +1,8 @@
 package com.example.demo.controller;
 
-import com.example.demo.entity.Payment;
-import com.example.demo.repository.PaymentRepository;
+import com.example.demo.dto.request.PaymentRequest;
+import com.example.demo.dto.response.PaymentResponse;
+import com.example.demo.service.PaymentService;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
@@ -9,30 +10,37 @@ import java.util.List;
 @RequestMapping("/api/payments")
 public class PaymentController {
 
-    private final PaymentRepository paymentRepository;
+    private final PaymentService paymentService;
 
-    public PaymentController(PaymentRepository paymentRepository) {
-        this.paymentRepository = paymentRepository;
+    public PaymentController(PaymentService paymentService) {
+        this.paymentService = paymentService;
     }
 
     @GetMapping
-    public List<Payment> getAllPayments() {
-        return paymentRepository.findAll();
+    public List<PaymentResponse> getAllPayments() {
+        return paymentService.getAllPayments();
+    }
+
+    @GetMapping("/{id}")
+    public PaymentResponse getPaymentById(@PathVariable Long id) {
+        return paymentService.getPaymentById(id);
     }
 
     @PostMapping
-    public Payment createPayment(@RequestBody Payment payment) {
-        return paymentRepository.save(payment);
+    public PaymentResponse createPayment(@RequestBody PaymentRequest request) {
+        return paymentService.createPayment(request);
     }
 
     @PutMapping("/{id}")
-    public Payment updatePayment(@PathVariable Long id, @RequestBody Payment payment) {
-        payment.setId(id);
-        return paymentRepository.save(payment);
+    public PaymentResponse updatePayment(
+            @PathVariable Long id,
+            @RequestBody PaymentRequest request
+    ) {
+        return paymentService.updatePayment(id, request);
     }
 
     @DeleteMapping("/{id}")
     public void deletePayment(@PathVariable Long id) {
-        paymentRepository.deleteById(id);
+        paymentService.deletePayment(id);
     }
 }

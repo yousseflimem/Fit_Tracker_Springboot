@@ -1,38 +1,35 @@
 package com.example.demo.controller;
 
-import com.example.demo.entity.Review;
-import com.example.demo.repository.ReviewRepository;
+import com.example.demo.dto.request.ReviewRequest;
+import com.example.demo.dto.response.ReviewResponse;
+import com.example.demo.service.ReviewService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/reviews")
 public class ReviewController {
 
-    private final ReviewRepository reviewRepository;
+    @Autowired private ReviewService reviewService;
 
-    public ReviewController(ReviewRepository reviewRepository) {
-        this.reviewRepository = reviewRepository;
+    @GetMapping("/workout/{workoutId}")
+    public Page<ReviewResponse> getReviewsByWorkout(
+            @PathVariable Long workoutId,
+            @RequestParam(defaultValue="0") int page,
+            @RequestParam(defaultValue="10") int size) {
+        return reviewService.getReviewsByWorkout(workoutId, page, size);
     }
 
-    @GetMapping
-    public List<Review> getAllReviews() {
-        return reviewRepository.findAll();
-    }
 
     @PostMapping
-    public Review createReview(@RequestBody Review review) {
-        return reviewRepository.save(review);
-    }
-
-    @PutMapping("/{id}")
-    public Review updateReview(@PathVariable Long id, @RequestBody Review review) {
-        review.setId(id);
-        return reviewRepository.save(review);
+    public ReviewResponse createReview(@RequestBody ReviewRequest request) {
+        return reviewService.createReview(request);
     }
 
     @DeleteMapping("/{id}")
     public void deleteReview(@PathVariable Long id) {
-        reviewRepository.deleteById(id);
+        reviewService.deleteReview(id);
     }
 }

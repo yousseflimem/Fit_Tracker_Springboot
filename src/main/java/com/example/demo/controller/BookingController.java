@@ -1,43 +1,43 @@
 package com.example.demo.controller;
 
-import com.example.demo.entity.Booking;
-import com.example.demo.repository.BookingRepository;
+import com.example.demo.dto.request.BookingRequest;
+import com.example.demo.dto.response.BookingResponse;
+import com.example.demo.service.BookingService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/bookings")
 public class BookingController {
 
-    private final BookingRepository bookingRepository;
+    @Autowired
+    private BookingService bookingService;
 
-    public BookingController(BookingRepository bookingRepository) {
-        this.bookingRepository = bookingRepository;
+    @PostMapping
+    public BookingResponse createBooking(@RequestBody BookingRequest request) {
+        return bookingService.create(request);
     }
 
     @GetMapping
-    public List<Booking> getAllBookings() {
-        return bookingRepository.findAll();
+    public List<BookingResponse> getAllBookings() {
+        return bookingService.getAll();
     }
 
-    @PostMapping
-    public Booking createBooking(@RequestBody Booking booking) {
-        return bookingRepository.save(booking);
+    @GetMapping("/user/{userId}")
+    public List<BookingResponse> getBookingsByUser(@PathVariable Long userId) {
+        return bookingService.getByUserId(userId);
     }
 
     @PutMapping("/{id}")
-    public Booking updateBooking(@PathVariable Long id, @RequestBody Booking booking) {
-        booking.setId(id);
-        return bookingRepository.save(booking);
+    public BookingResponse updateBooking(@PathVariable Long id, @RequestBody BookingRequest request) {
+        return bookingService.update(id, request);
     }
 
     @DeleteMapping("/{id}")
     public void deleteBooking(@PathVariable Long id) {
-        bookingRepository.deleteById(id);
-    }
-
-    @GetMapping("/user/{userId}")
-    public List<Booking> getBookingsByUserId(@PathVariable Long userId) {
-        return bookingRepository.findByUserId(userId);
+        bookingService.delete(id);
     }
 }

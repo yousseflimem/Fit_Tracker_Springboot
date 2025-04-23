@@ -1,43 +1,52 @@
 package com.example.demo.controller;
 
-import com.example.demo.entity.Workout;
-import com.example.demo.repository.WorkoutRepository;
+import com.example.demo.dto.request.WorkoutRequest;
+import com.example.demo.dto.response.WorkoutResponse;
+import com.example.demo.service.WorkoutService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/workouts")
 public class WorkoutController {
 
-    private final WorkoutRepository workoutRepository;
+    private final WorkoutService workoutService;
 
-    public WorkoutController(WorkoutRepository workoutRepository) {
-        this.workoutRepository = workoutRepository;
+    @Autowired
+    public WorkoutController(WorkoutService workoutService) {
+        this.workoutService = workoutService;
     }
 
     @GetMapping
-    public List<Workout> getAllWorkouts() {
-        return workoutRepository.findAll();
+    public Page<WorkoutResponse> searchWorkouts(
+            @RequestParam String keyword,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return workoutService.searchWorkouts(keyword, page, size);
+    }
+
+    @GetMapping("/{id}")
+    public WorkoutResponse getWorkout(@PathVariable Long id) {
+        return workoutService.getWorkout(id);
     }
 
     @PostMapping
-    public Workout createWorkout(@RequestBody Workout workout) {
-        return workoutRepository.save(workout);
+    public WorkoutResponse createWorkout(@RequestBody WorkoutRequest workoutRequest) {
+        return workoutService.createWorkout(workoutRequest);
     }
 
     @PutMapping("/{id}")
-    public Workout updateWorkout(@PathVariable Long id, @RequestBody Workout workout) {
-        workout.setId(id);
-        return workoutRepository.save(workout);
+    public WorkoutResponse updateWorkout(
+            @PathVariable Long id,
+            @RequestBody WorkoutRequest workoutRequest
+    ) {
+        return workoutService.updateWorkout(id, workoutRequest);
     }
 
     @DeleteMapping("/{id}")
     public void deleteWorkout(@PathVariable Long id) {
-        workoutRepository.deleteById(id);
-    }
-
-    @GetMapping("/{id}")
-    public Workout getWorkoutById(@PathVariable Long id) {
-        return workoutRepository.findWorkoutById(id).orElse(null);
+        workoutService.deleteWorkout(id);
     }
 }
