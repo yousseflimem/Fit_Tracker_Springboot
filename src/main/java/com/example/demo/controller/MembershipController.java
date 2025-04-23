@@ -1,38 +1,44 @@
 package com.example.demo.controller;
 
-import com.example.demo.entity.Membership;
-import com.example.demo.repository.MembershipRepository;
+import com.example.demo.dto.request.MembershipRequest;
+import com.example.demo.dto.response.MembershipResponse;
+import com.example.demo.service.MembershipService;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/memberships")
 public class MembershipController {
 
-    private final MembershipRepository membershipRepository;
+    private final MembershipService service;
 
-    public MembershipController(MembershipRepository membershipRepository) {
-        this.membershipRepository = membershipRepository;
+    public MembershipController(MembershipService service) {
+        this.service = service;
     }
 
     @GetMapping
-    public List<Membership> getAllMemberships() {
-        return membershipRepository.findAll();
+    public List<MembershipResponse> getAll() {
+        return service.getAll();
+    }
+
+    @GetMapping("/{id}")
+    public MembershipResponse getById(@PathVariable Long id) {
+        return service.getById(id);
     }
 
     @PostMapping
-    public Membership createMembership(@RequestBody Membership membership) {
-        return membershipRepository.save(membership);
+    public MembershipResponse create(@RequestBody MembershipRequest request) {
+        return service.create(request);
     }
 
     @PutMapping("/{id}")
-    public Membership updateMembership(@PathVariable Long id, @RequestBody Membership membership) {
-        membership.setId(id);
-        return membershipRepository.save(membership);
+    public MembershipResponse update(@PathVariable Long id, @RequestBody MembershipRequest request) {
+        return service.update(id, request);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteMembership(@PathVariable Long id) {
-        membershipRepository.deleteById(id);
+    public void delete(@PathVariable Long id) {
+        service.delete(id);
     }
 }

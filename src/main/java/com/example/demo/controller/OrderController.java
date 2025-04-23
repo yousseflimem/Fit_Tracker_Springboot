@@ -1,43 +1,39 @@
 package com.example.demo.controller;
 
-import com.example.demo.entity.Order;
-import com.example.demo.repository.OrderRepository;
+import com.example.demo.dto.request.OrderRequest;
+import com.example.demo.dto.response.OrderResponse;
+import com.example.demo.service.OrderService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
 
 @RestController
-@RequestMapping("/api/orders")
+@RequestMapping("/api/orders")  // Changed to /api/orders for consistency
 public class OrderController {
 
-    private final OrderRepository orderRepository;
+    private final OrderService orderService;
 
-    public OrderController(OrderRepository orderRepository) {
-        this.orderRepository = orderRepository;
+    @Autowired
+    public OrderController(OrderService orderService) {
+        this.orderService = orderService;
     }
 
-    @GetMapping
-    public List<Order> getAllOrders() {
-        return orderRepository.findAll();
+    @GetMapping("/{id}")
+    public OrderResponse getOrder(@PathVariable Long id) {
+        return orderService.getById(id);
     }
 
     @PostMapping
-    public Order createOrder(@RequestBody Order order) {
-        return orderRepository.save(order);
+    public OrderResponse createOrder(@RequestBody OrderRequest orderRequest) {
+        return orderService.create(orderRequest);
     }
 
     @PutMapping("/{id}")
-    public Order updateOrder(@PathVariable Long id, @RequestBody Order order) {
-        order.setId(id);
-        return orderRepository.save(order);
+    public OrderResponse updateOrder(@PathVariable Long id, @RequestBody OrderRequest orderRequest) {
+        return orderService.update(id, orderRequest);
     }
 
     @DeleteMapping("/{id}")
     public void deleteOrder(@PathVariable Long id) {
-        orderRepository.deleteById(id);
-    }
-
-    @GetMapping("/user/{userId}")
-    public List<Order> getOrdersByUserId(@PathVariable Long userId) {
-        return orderRepository.findOrdersByUserId(userId);
+        orderService.deleteOrder(id);
     }
 }

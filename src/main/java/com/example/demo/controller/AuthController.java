@@ -1,7 +1,7 @@
 package com.example.demo.controller;
 
-import com.example.demo.entity.Role;
-import com.example.demo.entity.User;
+import com.example.demo.model.enums.Role;
+import com.example.demo.model.entity.User;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.security.JwtUtils;
 import org.slf4j.Logger;
@@ -44,11 +44,15 @@ public class AuthController {
 
         User user = new User();
         user.setUsername(request.username());
-        // Save password as plain text (using NoOp encoder)
         user.setPassword(passwordEncoder.encode(request.password()));
         user.setRole(Role.USER);
-        userRepository.save(user);
 
+        // Only set email if provided in request
+        if (request.email() != null && !request.email().isEmpty()) {
+            user.setEmail(request.email());
+        }
+        
+        userRepository.save(user);
         logger.info("User registered: {}", request.username());
         return ResponseEntity.ok("User registered successfully!");
     }
@@ -77,7 +81,7 @@ public class AuthController {
         return passwordEncoder.encode(raw);
     }
 
-    public record RegisterRequest(String username, String password) {}
+    public record RegisterRequest(String username, String password, String email) {}
     public record AuthRequest(String username, String password) {}
     public record AuthResponse(String token) {}
 }

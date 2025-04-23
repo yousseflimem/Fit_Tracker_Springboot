@@ -1,11 +1,15 @@
+// src/main/java/com/example/demo/repository/BookingRepository.java
 package com.example.demo.repository;
 
-import com.example.demo.entity.Booking;
+import com.example.demo.model.entity.Booking;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import java.util.List;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
-    // Custom query methods can be defined here if needed
-    // For example, find bookings by user ID or date range
+    Page<Booking> findByUserId(Long userId, Pageable pageable);
+
     List<Booking> findByUserId(Long userId);
 }
