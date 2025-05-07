@@ -33,8 +33,8 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private Role role;
 
-    @ManyToOne
-    @JoinColumn(name = "membership_id",nullable = true)  // Corrected to OneToOne
+    @OneToOne
+    @JoinColumn(name = "membership_id")
     private Membership membership;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)

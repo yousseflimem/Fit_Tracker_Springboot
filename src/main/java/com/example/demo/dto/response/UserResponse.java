@@ -1,21 +1,23 @@
 package com.example.demo.dto.response;
 
 import com.example.demo.model.entity.User;
-import lombok.Data;
+import lombok.Getter;
 
-@Data
+@Getter
 public class UserResponse {
-    private Long id;
-    private String username;
-    private String email;
-    private String role;
-    private Long membershipId;
+    private final Long   id;
+    private final String username;
+    private final String email;
+    private final String role;
+    private final Long   membershipId;
+    private final String membershipType;
 
-    public UserResponse(User user) {
-        this.id = user.getId();
-        this.username = user.getUsername();
-        this.email = user.getEmail();
-        this.role = user.getRole().name();
-        this.membershipId = user.getMembership() != null ? user.getMembership().getId() : null;
+    public UserResponse(User u) {
+        this.id             = u.getId();
+        this.username       = u.getUsername();
+        this.email          = u.getEmail();
+        this.role           = u.getRole().name();
+        this.membershipId   = (u.getMembership() != null ? u.getMembership().getId() : null);
+        this.membershipType = (u.getMembership() != null ? u.getMembership().getType().name() : null);
     }
 }

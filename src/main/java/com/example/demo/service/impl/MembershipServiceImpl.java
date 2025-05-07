@@ -23,9 +23,14 @@ public class MembershipServiceImpl implements MembershipService {
         return repository.findAll().stream()
                 .map(m -> new MembershipResponse(
                         m.getId(),
+                        m.getName(),
+                        m.getDescription(),
                         m.getType(),
                         m.getPrice(),
-                        m.getDuration()
+                        m.getDuration(),
+                        m.isActive(),
+                        m.getCreatedAt(),
+                        m.getUpdatedAt()
                 ))
                 .toList();
     }
@@ -34,28 +39,80 @@ public class MembershipServiceImpl implements MembershipService {
     public MembershipResponse getById(Long id) {
         Membership m = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Membership not found"));
-        return new MembershipResponse(m.getId(), m.getType(), m.getPrice(), m.getDuration());
+        return new MembershipResponse(
+                m.getId(),
+                m.getName(),
+                m.getDescription(),
+                m.getType(),
+                m.getPrice(),
+                m.getDuration(),
+                m.isActive(),
+                m.getCreatedAt(),
+                m.getUpdatedAt()
+        );
     }
 
     @Override
     public MembershipResponse create(MembershipRequest request) {
         Membership m = new Membership();
+        m.setName(request.name());
+        m.setDescription(request.description());
         m.setType(request.type());
         m.setPrice(request.price());
         m.setDuration(request.duration());
+        if (request.active() != null) {
+            m.setActive(request.active());
+        }
         repository.save(m);
-        return new MembershipResponse(m.getId(), m.getType(), m.getPrice(), m.getDuration());
+        return new MembershipResponse(
+                m.getId(),
+                m.getName(),
+                m.getDescription(),
+                m.getType(),
+                m.getPrice(),
+                m.getDuration(),
+                m.isActive(),
+                m.getCreatedAt(),
+                m.getUpdatedAt()
+        );
     }
 
     @Override
     public MembershipResponse update(Long id, MembershipRequest request) {
         Membership m = repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Membership not found"));
-        m.setType(request.type());
-        m.setPrice(request.price());
-        m.setDuration(request.duration());
+
+        if (request.name() != null) {
+            m.setName(request.name());
+        }
+        if (request.description() != null) {
+            m.setDescription(request.description());
+        }
+        if (request.type() != null) {
+            m.setType(request.type());
+        }
+        if (request.price() != null) {
+            m.setPrice(request.price());
+        }
+        if (request.duration() != null) {
+            m.setDuration(request.duration());
+        }
+        if (request.active() != null) {
+            m.setActive(request.active());
+        }
+
         repository.save(m);
-        return new MembershipResponse(m.getId(), m.getType(), m.getPrice(), m.getDuration());
+        return new MembershipResponse(
+                m.getId(),
+                m.getName(),
+                m.getDescription(),
+                m.getType(),
+                m.getPrice(),
+                m.getDuration(),
+                m.isActive(),
+                m.getCreatedAt(),
+                m.getUpdatedAt()
+        );
     }
 
     @Override
