@@ -3,6 +3,10 @@ package com.example.demo.model.entity;
 import com.example.demo.model.enums.MembershipType;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "memberships")
@@ -10,10 +14,17 @@ import lombok.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Membership {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false)
+    private String name;
+
+    @Column(length = 500)
+    private String description;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -23,5 +34,18 @@ public class Membership {
     private Double price;
 
     @Column(nullable = false)
-    private Integer duration;  // Renamed from `durationInDays` to match diagram
+    private Integer duration;  // Duration in days
+
+    @Column(nullable = false)
+    private boolean active = true;
+
+    @CreationTimestamp
+    @Column(updatable = false)
+    private LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
+
+    // We maintain the existing OneToOne relationship with User
+    // The User entity already has a @OneToOne relationship with Membership
 }

@@ -18,7 +18,7 @@ public class ClassController {
         this.classService = classService;
     }
 
-    @GetMapping
+    @GetMapping("/search")
     public Page<ClassResponse> searchClasses(
             @RequestParam String keyword,
             @RequestParam(defaultValue = "0") int page,

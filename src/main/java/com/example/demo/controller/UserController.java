@@ -18,37 +18,31 @@ public class UserController {
     private UserService userService;
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN')")
     public List<UserResponse> getAllUsers() {
         return userService.getAll();
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN','USER','COACH')")
     public UserResponse getUserById(@PathVariable Long id) {
         return userService.getById(id);
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
     public UserResponse createUser(@RequestBody CreateUserDto dto) {
         return userService.create(dto);
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
     public UserResponse updateUser(@PathVariable Long id, @RequestBody CreateUserDto dto) {
         return userService.update(id, dto);
     }
 
     @PutMapping("/{id}/role")
-    @PreAuthorize("hasRole('ADMIN')")
     public UserResponse updateUserRole(@PathVariable Long id, @RequestParam Role role) {
         return userService.updateRole(id, role);
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
     public void deleteUser(@PathVariable Long id) {
         userService.delete(id);
     }
