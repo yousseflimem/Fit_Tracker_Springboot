@@ -1,11 +1,14 @@
 package com.example.demo.controller;
 
+import com.example.demo.dto.response.UserResponse;
 import com.example.demo.model.enums.Role;
 import com.example.demo.model.entity.User;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.security.JwtUtils;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -13,7 +16,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -37,28 +44,30 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerUser(@RequestBody RegisterRequest request) {
+    @Transactional
+    public ResponseEntity<?> registerUser(@Valid @RequestBody RegisterRequest request) {
         if (userRepository.existsByUsername(request.username())) {
-            return ResponseEntity.badRequest().body("Error: Username is already taken!");
+            return ResponseEntity.badRequest().body(new ErrorResponse("Username is already taken"));
+        }
+        if (request.email() != null && userRepository.existsByEmail(request.email())) {
+            return ResponseEntity.badRequest().body(new ErrorResponse("Email is already taken"));
         }
 
         User user = new User();
         user.setUsername(request.username());
         user.setPassword(passwordEncoder.encode(request.password()));
         user.setRole(Role.USER);
-
-        // Only set email if provided in request
         if (request.email() != null && !request.email().isEmpty()) {
             user.setEmail(request.email());
         }
-        
+
         userRepository.save(user);
         logger.info("User registered: {}", request.username());
-        return ResponseEntity.ok("User registered successfully!");
+        return ResponseEntity.ok(new SuccessResponse("User registered successfully"));
     }
 
     @PostMapping("/authenticate")
-    public ResponseEntity<?> authenticateUser(@RequestBody AuthRequest request) {
+    public ResponseEntity<?> authenticateUser(@Valid @RequestBody AuthRequest request) {
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -71,8 +80,8 @@ public class AuthController {
             logger.info("User authenticated: {}", request.username());
             return ResponseEntity.ok(new AuthResponse(jwt));
         } catch (AuthenticationException e) {
-            logger.error("Authentication failed for user {}: {}", request.username(), e.getMessage(), e);
-            return ResponseEntity.status(401).body("Invalid credentials");
+            logger.error("Authentication failed for user {}: {}", request.username(), e.getMessage());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse("Invalid credentials"));
         }
     }
 
@@ -81,7 +90,28 @@ public class AuthController {
         return passwordEncoder.encode(raw);
     }
 
-    public record RegisterRequest(String username, String password, String email) {}
-    public record AuthRequest(String username, String password) {}
+    @GetMapping("/me")
+    public UserResponse getCurrentUser(Authentication authentication) {
+        String username = authentication.getName();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return new UserResponse(user);
+    }
+
+    public record RegisterRequest(
+            @NotBlank(message = "Username is required") String username,
+            @NotBlank(message = "Password is required") String password,
+            @Email(message = "Email must be valid") String email
+    ) {}
+
+    public record AuthRequest(
+            @NotBlank(message = "Username is required") String username,
+            @NotBlank(message = "Password is required") String password
+    ) {}
+
     public record AuthResponse(String token) {}
+
+    public record ErrorResponse(String message) {}
+
+    public record SuccessResponse(String message) {}
 }

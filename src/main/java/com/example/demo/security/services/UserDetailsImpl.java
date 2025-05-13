@@ -2,6 +2,7 @@ package com.example.demo.security.services;
 
 import com.example.demo.model.entity.User;
 import com.example.demo.model.enums.Role;
+import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -9,9 +10,11 @@ import java.util.Collection;
 import java.util.List;
 
 public class UserDetailsImpl implements UserDetails {
+    @Getter
     private final Long id;
     private final String username;
     private final String password;
+    @Getter
     private final Role role;
     private final Collection<? extends GrantedAuthority> authorities;
 
@@ -37,13 +40,7 @@ public class UserDetailsImpl implements UserDetails {
         );
     }
 
-    public Long getId() {
-        return id;
-    }
 
-    public Role getRole() {
-        return role;
-    }
 
     @Override public String getUsername() { return username; }
     @Override public String getPassword() { return password; }

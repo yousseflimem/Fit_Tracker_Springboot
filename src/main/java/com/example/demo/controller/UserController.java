@@ -3,9 +3,11 @@ package com.example.demo.controller;
 import com.example.demo.dto.request.CreateUserDto;
 import com.example.demo.dto.response.UserResponse;
 import com.example.demo.model.enums.Role;
+import com.example.demo.service.SecurityService;
 import com.example.demo.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,36 +16,57 @@ import java.util.List;
 @RequestMapping("/api/users")
 public class UserController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
+    private final SecurityService securityService;
+
+    public UserController(UserService userService, SecurityService securityService) {
+        this.userService = userService;
+        this.securityService = securityService;
+    }
 
     @GetMapping
-    public List<UserResponse> getAllUsers() {
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<UserResponse> getAll() {
         return userService.getAll();
     }
 
     @GetMapping("/{id}")
-    public UserResponse getUserById(@PathVariable Long id) {
+    @PreAuthorize("hasRole('ADMIN') or @securityService.isUser(#id, authentication)")
+    public UserResponse getById(@PathVariable Long id) {
         return userService.getById(id);
     }
 
+    @GetMapping("/me")
+    @PreAuthorize("isAuthenticated()")
+    public UserResponse getCurrentUser(Authentication authentication) {
+        Long userId = securityService.getUserIdFromAuthentication(authentication);
+        if (userId == null) {
+            throw new IllegalStateException("Authenticated user ID not found");
+        }
+        return userService.getById(userId);
+    }
+
     @PostMapping
-    public UserResponse createUser(@RequestBody CreateUserDto dto) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public UserResponse create(@Valid @RequestBody CreateUserDto dto) {
         return userService.create(dto);
     }
 
     @PutMapping("/{id}")
-    public UserResponse updateUser(@PathVariable Long id, @RequestBody CreateUserDto dto) {
+    @PreAuthorize("hasRole('ADMIN') or @securityService.isUser(#id, authentication)")
+    public UserResponse update(@PathVariable Long id, @Valid @RequestBody CreateUserDto dto) {
         return userService.update(id, dto);
     }
 
-    @PutMapping("/{id}/role")
-    public UserResponse updateUserRole(@PathVariable Long id, @RequestParam Role role) {
+    @PatchMapping("/{id}/role")
+    @PreAuthorize("hasRole('ADMIN')")
+    public UserResponse updateRole(@PathVariable Long id, @RequestBody Role role) {
         return userService.updateRole(id, role);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteUser(@PathVariable Long id) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public void delete(@PathVariable Long id) {
         userService.delete(id);
     }
 }

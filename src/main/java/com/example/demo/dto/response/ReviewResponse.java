@@ -1,29 +1,26 @@
 package com.example.demo.dto.response;
 
 import com.example.demo.model.entity.Review;
-import lombok.Data;
-
 import java.time.LocalDateTime;
 
-@Data
-public class ReviewResponse {
-    private Long id;
-    private Integer rating;
-    private String comment;
-    private LocalDateTime createdAt;
-    private Long userId;
-    private String username;
-    private Long workoutId;
-    private String workoutName;
-
-    public ReviewResponse(Review r) {
-        this.id = r.getId();
-        this.rating = r.getRating();
-        this.comment = r.getComment();
-        this.createdAt = r.getCreatedAt();
-        this.userId = r.getUser().getId();
-        this.username = r.getUser().getUsername();
-        this.workoutId = r.getWorkout().getId();
-        this.workoutName = r.getWorkout().getName();
+public record ReviewResponse(
+        Long id,
+        Integer rating,
+        String comment,
+        LocalDateTime createdAt,
+        Long userId,
+        String username,
+        Long workoutId
+) {
+    public ReviewResponse(Review review) {
+        this(
+                review.getId(),
+                review.getRating(),
+                review.getComment(),
+                review.getCreatedAt(),
+                review.getUser().getId(),
+                review.getUser().getUsername(),
+                review.getWorkout().getId()
+        );
     }
 }

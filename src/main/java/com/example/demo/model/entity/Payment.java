@@ -2,10 +2,13 @@ package com.example.demo.model.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "payments")
+@Table(name = "payments", indexes = {
+        @Index(name = "idx_payments_order_id", columnList = "order_id")
+})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -25,6 +28,11 @@ public class Payment {
     @Column(nullable = false)
     private LocalDateTime paymentDate;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String status;  // e.g., "PENDING", "COMPLETED", "FAILED"
+    private PaymentStatus status;
+
+    public enum PaymentStatus {
+        PENDING, COMPLETED, FAILED
+    }
 }

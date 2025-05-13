@@ -10,4 +10,5 @@ public interface WorkoutService {
     WorkoutResponse createWorkout(WorkoutRequest workoutRequest);
     WorkoutResponse updateWorkout(Long id, WorkoutRequest workoutRequest);
     void deleteWorkout(Long id);
+    Page<WorkoutResponse> getWorkoutsByCoach(Long coachId, int page, int size); // New method
 }

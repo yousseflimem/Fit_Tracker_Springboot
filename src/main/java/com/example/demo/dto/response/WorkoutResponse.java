@@ -1,6 +1,8 @@
 package com.example.demo.dto.response;
 
+import com.example.demo.model.entity.Image;
 import com.example.demo.model.entity.Workout;
+import java.util.List;
 
 public record WorkoutResponse(
         Long id,
@@ -10,7 +12,9 @@ public record WorkoutResponse(
         Integer durationInMinutes,
         Integer viewCount,
         Long coachId,
-        String coachName
+        String coachName,
+        String coachProfileImageUrl,
+        List<String> imageUrls
 ) {
     public WorkoutResponse(Workout workout) {
         this(
@@ -21,7 +25,11 @@ public record WorkoutResponse(
                 workout.getDuration(),
                 workout.getViewCount(),
                 workout.getCoach().getId(),
-                workout.getCoach().getUsername()
+                workout.getCoach().getUsername(),
+                workout.getCoach().getProfileImageUrl(),
+                workout.getImages().stream()
+                        .map(Image::getUrl)
+                        .toList()
         );
     }
 }

@@ -1,24 +1,26 @@
 package com.example.demo.dto.response;
 
-import com.example.demo.model.enums.BookingStatus;
 import com.example.demo.model.entity.Booking;
-import lombok.Data;
+import com.example.demo.model.enums.BookingStatus;
 
 import java.time.LocalDateTime;
 
-@Data
-public class BookingResponse {
-    private Long id;
-    private Long userId;
-    private Long classId;
-    private LocalDateTime bookingDate;
-    private BookingStatus status;
-
+public record BookingResponse(
+        Long id,
+        Long userId,
+        Long classId,
+        String classTitle,
+        LocalDateTime bookingDate,
+        BookingStatus status
+) {
     public BookingResponse(Booking booking) {
-        this.id = booking.getId();
-        this.userId = booking.getUser().getId();
-        this.classId = booking.getGymClass().getId();
-        this.bookingDate = booking.getBookingDate();
-        this.status = booking.getStatus();
+        this(
+                booking.getId(),
+                booking.getUser().getId(),
+                booking.getGymClass().getId(),
+                booking.getGymClass().getTitle(),
+                booking.getBookingDate(),
+                booking.getStatus()
+        );
     }
 }

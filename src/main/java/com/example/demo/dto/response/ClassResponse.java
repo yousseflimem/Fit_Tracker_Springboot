@@ -1,8 +1,12 @@
 package com.example.demo.dto.response;
 
-import java.time.LocalDateTime;
 import com.example.demo.model.entity.GymClass;
+import com.example.demo.model.entity.Image;
+import com.example.demo.model.entity.Workout;
 
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public record ClassResponse(
         Long id,
@@ -15,7 +19,8 @@ public record ClassResponse(
         Integer capacity,
         Long coachId,
         String coachName,
-        String imageUrl
+        List<String> imageUrls,
+        List<Long> workoutIds
 ) {
     public ClassResponse(GymClass gymClass) {
         this(
@@ -29,7 +34,12 @@ public record ClassResponse(
                 gymClass.getCapacity(),
                 gymClass.getCoach().getId(),
                 gymClass.getCoach().getUsername(),
-                gymClass.getImageUrl()
+                gymClass.getImages().stream()
+                        .map(Image::getUrl)
+                        .collect(Collectors.toList()),
+                gymClass.getWorkouts().stream()
+                        .map(Workout::getId)
+                        .collect(Collectors.toList())
         );
     }
 }

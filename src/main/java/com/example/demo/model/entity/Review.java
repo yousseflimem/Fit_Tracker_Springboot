@@ -5,7 +5,10 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "reviews")
+@Table(name = "reviews", indexes = {
+        @Index(name = "idx_reviews_user_id", columnList = "user_id"),
+        @Index(name = "idx_reviews_workout_id", columnList = "workout_id")
+})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -28,7 +31,7 @@ public class Review {
     private User user;
 
     @ManyToOne
-    @JoinColumn(name = "workout_id")  // Linked to Workout (adjust based on class diagram)
+    @JoinColumn(name = "workout_id", nullable = false)
     private Workout workout;
 
     @PrePersist

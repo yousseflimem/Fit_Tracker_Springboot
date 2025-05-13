@@ -1,9 +1,14 @@
 package com.example.demo.dto.request;
 
+import jakarta.validation.constraints.*;
+import java.util.List;
+
 public record WorkoutRequest(
-        String name,
-        String category,
+        @NotBlank(message = "Name is required") String name,
+        @NotBlank(message = "Category is required") String category,
         String description,
-        Integer durationInMinutes,
-        Long coachId
+        @Positive(message = "Duration must be positive") Integer durationInMinutes,
+        @NotNull(message = "Coach ID is required") Long coachId,
+        @NotEmpty(message = "At least one image URL is required")
+        List<String> imageUrls
 ) { }

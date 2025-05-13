@@ -13,4 +13,5 @@ public interface ProductService {
     Page<ProductResponse> getLowStockProducts(int threshold, int page, int size);
     Integer getTotalSoldQuantity(Long productId);
     void updateStock(Long productId, int quantityChange);
+    void setStock(Long productId, int newStock); // New method
 }
