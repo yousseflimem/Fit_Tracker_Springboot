@@ -10,5 +10,6 @@ public record OrderResponse(
         String status,
         Long userId,
         String userEmail,
+        String userProfileImageUrl,
         List<OrderItemResponse> items
-) {}  // Fixed closing brace
+) {}

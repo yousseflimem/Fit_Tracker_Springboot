@@ -1,5 +1,6 @@
 package com.example.demo.security;
 
+import com.example.demo.security.services.UserDetailsServiceImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -13,7 +14,6 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
-import com.example.demo.security.services.UserDetailsServiceImpl;
 import java.io.IOException;
 
 @Component
@@ -34,10 +34,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain)
             throws ServletException, IOException {
-
-                
-
-        // Skip filter for authentication endpoints
         if (request.getServletPath().startsWith("/api/auth")) {
             filterChain.doFilter(request, response);
             return;
@@ -45,26 +41,23 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         try {
             String jwt = parseJwt(request);
-            logger.debug("JWT found: {}", jwt);
-
             if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
                 String username = jwtUtils.getUsernameFromToken(jwt);
-                logger.debug("JWT valid. Username extracted: {}", username);
-
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(
                                 userDetails,
-                                null,
+                                jwt, // Store JWT as credentials
                                 userDetails.getAuthorities()
                         );
-
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         } catch (Exception e) {
             logger.error("Failed to process JWT: {}", e.getMessage());
-            SecurityContextHolder.clearContext();
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("{\"error\": \"Invalid or expired JWT token\"}");
+            return;
         }
 
         filterChain.doFilter(request, response);
@@ -72,8 +65,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     private String parseJwt(HttpServletRequest request) {
         String header = request.getHeader("Authorization");
-        if (header != null && header.startsWith("Bearer ")) {
-            return header.substring(7); // "Bearer " is 7 characters
+        if (StringUtils.hasText(header) && header.startsWith("Bearer ")) {
+            return header.substring(7);
         }
         return null;
     }

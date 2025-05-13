@@ -1,22 +1,22 @@
 package com.example.demo.service.impl;
 
 import com.example.demo.dto.request.OrderRequest;
-import com.example.demo.dto.request.OrderItemRequest;
-import com.example.demo.dto.response.OrderResponse;
 import com.example.demo.dto.response.OrderItemResponse;
+import com.example.demo.dto.response.OrderResponse;
 import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.model.entity.*;
 import com.example.demo.model.enums.OrderStatus;
 import com.example.demo.repository.*;
 import com.example.demo.service.OrderService;
 import com.example.demo.util.PaginationUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -27,11 +27,12 @@ public class OrderServiceImpl implements OrderService {
     private final ProductRepository productRepository;
     private final OrderItemRepository orderItemRepository;
 
-    @Autowired
-    public OrderServiceImpl(OrderRepository orderRepository,
-                            UserRepository userRepository,
-                            ProductRepository productRepository,
-                            OrderItemRepository orderItemRepository) {
+    public OrderServiceImpl(
+            OrderRepository orderRepository,
+            UserRepository userRepository,
+            ProductRepository productRepository,
+            OrderItemRepository orderItemRepository
+    ) {
         this.orderRepository = orderRepository;
         this.userRepository = userRepository;
         this.productRepository = productRepository;
@@ -47,17 +48,24 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional(readOnly = true)
+    public Page<OrderResponse> getByUserId(Long userId, int page, int size) {
+        PageRequest pageRequest = PaginationUtil.createPageRequest(page, size);
+        return orderRepository.findByUserId(userId, pageRequest).map(this::toOrderResponse);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public OrderResponse getById(Long id) {
         Order order = orderRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found with id: " + id));
         return toOrderResponse(order);
     }
 
     @Override
     @Transactional
-    public OrderResponse create(OrderRequest request) {
-        User user = userRepository.findById(request.userId())
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+    public OrderResponse create(OrderRequest request, Long userId, Authentication authentication) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
 
         Order order = new Order();
         order.setUser(user);
@@ -66,25 +74,30 @@ public class OrderServiceImpl implements OrderService {
         order.setTotalAmount(0.0);
         Order savedOrder = orderRepository.save(order);
 
-        processOrderItems(request, savedOrder);
-        updateOrderTotal(savedOrder);
+        double total = processOrderItems(request.items(), savedOrder);
+        savedOrder.setTotalAmount(total);
+        savedOrder.setStatus(OrderStatus.COMPLETED);
+        orderRepository.save(savedOrder);
 
         return toOrderResponse(savedOrder);
     }
 
     @Override
     @Transactional
-    public OrderResponse update(Long id, OrderRequest request) {
+    public OrderResponse update(Long id, OrderRequest request, Long userId, Authentication authentication) {
         Order order = orderRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found with id: " + id));
 
-        // Clear existing items
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+        order.setUser(user);
+
         orderItemRepository.deleteAll(order.getItems());
         order.getItems().clear();
 
-        // Process new items
-        processOrderItems(request, order);
-        updateOrderTotal(order);
+        double total = processOrderItems(request.items(), order);
+        order.setTotalAmount(total);
+        order.setStatus(OrderStatus.COMPLETED);
 
         return toOrderResponse(orderRepository.save(order));
     }
@@ -93,28 +106,30 @@ public class OrderServiceImpl implements OrderService {
     @Transactional
     public void deleteOrder(Long id) {
         Order order = orderRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found with id: " + id));
         orderItemRepository.deleteAll(order.getItems());
         orderRepository.delete(order);
     }
 
-    private void processOrderItems(OrderRequest request, Order order) {
+    private double processOrderItems(List<OrderRequest.OrderItemRequest> itemRequests, Order order) {
         double total = 0.0;
-        for (OrderRequest.OrderItemRequest itemRequest : request.items()) {
+        List<OrderItem> items = new ArrayList<>();
+        for (OrderRequest.OrderItemRequest itemRequest : itemRequests) {
             GymProduct product = productRepository.findById(itemRequest.productId())
-                    .orElseThrow(() -> new ResourceNotFoundException(
-                            "Product not found: " + itemRequest.productId()));
+                    .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + itemRequest.productId()));
 
             OrderItem item = new OrderItem();
             item.setOrder(order);
             item.setProduct(product);
             item.setQuantity(itemRequest.quantity());
-            orderItemRepository.save(item);
+            items.add(item);
 
             total += product.getPrice() * itemRequest.quantity();
             updateProductStock(product, itemRequest.quantity());
         }
-        order.setTotalAmount(total);
+        order.getItems().addAll(items);
+        orderItemRepository.saveAll(items);
+        return total;
     }
 
     private void updateProductStock(GymProduct product, int quantity) {
@@ -124,14 +139,6 @@ public class OrderServiceImpl implements OrderService {
         }
         product.setStock(newStock);
         productRepository.save(product);
-    }
-
-    private void updateOrderTotal(Order order) {
-        double total = order.getItems().stream()
-                .mapToDouble(item -> item.getProduct().getPrice() * item.getQuantity())
-                .sum();
-        order.setTotalAmount(total);
-        order.setStatus(OrderStatus.COMPLETED);
     }
 
     private OrderResponse toOrderResponse(Order order) {
@@ -151,6 +158,7 @@ public class OrderServiceImpl implements OrderService {
                 order.getStatus().name(),
                 order.getUser().getId(),
                 order.getUser().getEmail(),
+                order.getUser().getProfileImageUrl(),
                 items
         );
     }

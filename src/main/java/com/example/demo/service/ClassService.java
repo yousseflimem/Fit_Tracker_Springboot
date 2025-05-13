@@ -10,4 +10,5 @@ public interface ClassService {
     ClassResponse createClass(ClassRequest classRequest);
     ClassResponse updateClass(Long id, ClassRequest classRequest);
     void deleteClass(Long id);
+    Page<ClassResponse> getClassesByCoach(Long coachId, int page, int size); // New method
 }

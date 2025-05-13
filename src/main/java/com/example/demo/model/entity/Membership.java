@@ -34,7 +34,7 @@ public class Membership {
     private Double price;
 
     @Column(nullable = false)
-    private Integer duration;  // Duration in days
+    private Integer duration; // Duration in days
 
     @Column(nullable = false)
     private boolean active = true;
@@ -46,6 +46,6 @@ public class Membership {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    // We maintain the existing OneToOne relationship with User
-    // The User entity already has a @OneToOne relationship with Membership
+    @OneToOne(mappedBy = "membership", fetch = FetchType.LAZY)
+    private User user; // Clarify relationship
 }

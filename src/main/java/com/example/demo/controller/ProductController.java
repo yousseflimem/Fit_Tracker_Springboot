@@ -3,8 +3,9 @@ package com.example.demo.controller;
 import com.example.demo.dto.request.ProductRequest;
 import com.example.demo.dto.response.ProductResponse;
 import com.example.demo.service.ProductService;
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -13,7 +14,6 @@ public class ProductController {
 
     private final ProductService productService;
 
-    @Autowired
     public ProductController(ProductService productService) {
         this.productService = productService;
     }
@@ -33,24 +33,28 @@ public class ProductController {
     }
 
     @PostMapping
-    public ProductResponse createProduct(@RequestBody ProductRequest request) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public ProductResponse createProduct(@Valid @RequestBody ProductRequest request) {
         return productService.createProduct(request);
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ProductResponse updateProduct(
             @PathVariable Long id,
-            @RequestBody ProductRequest request
+            @Valid @RequestBody ProductRequest request
     ) {
         return productService.updateProduct(id, request);
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public void deleteProduct(@PathVariable Long id) {
         productService.deleteProduct(id);
     }
 
     @GetMapping("/low-stock")
+    @PreAuthorize("hasRole('ADMIN')")
     public Page<ProductResponse> getLowStockProducts(
             @RequestParam int threshold,
             @RequestParam(defaultValue = "0") int page,
@@ -60,10 +64,20 @@ public class ProductController {
     }
 
     @PutMapping("/{productId}/stock")
+    @PreAuthorize("hasRole('ADMIN')")
     public void updateStock(
             @PathVariable Long productId,
             @RequestParam int quantity
     ) {
         productService.updateStock(productId, quantity);
+    }
+
+    @PutMapping("/{productId}/stock/set")
+    @PreAuthorize("hasRole('ADMIN')")
+    public void setStock(
+            @PathVariable Long productId,
+            @RequestParam int stock
+    ) {
+        productService.setStock(productId, stock);
     }
 }
