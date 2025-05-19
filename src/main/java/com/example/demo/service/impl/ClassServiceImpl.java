@@ -68,7 +68,6 @@ public class ClassServiceImpl implements ClassService {
         User coach = userRepository.findById(classRequest.coachId())
                 .orElseThrow(() -> new ResourceNotFoundException("Coach not found with id: " + classRequest.coachId()));
 
-        // Validate workout IDs
         List<Workout> workouts = classRequest.workoutIds().stream()
                 .map(workoutId -> workoutRepository.findById(workoutId)
                         .orElseThrow(() -> new ResourceNotFoundException("Workout not found with id: " + workoutId)))
@@ -84,7 +83,6 @@ public class ClassServiceImpl implements ClassService {
         gymClass.setCoach(coach);
         gymClass.setWorkouts(workouts);
 
-        // Handle list of images
         List<Image> images = classRequest.imageUrls() != null
                 ? classRequest.imageUrls().stream()
                 .filter(url -> url != null && !url.trim().isEmpty())
@@ -103,7 +101,7 @@ public class ClassServiceImpl implements ClassService {
             return new ClassResponse(savedClass);
         } catch (Exception e) {
             logger.error("Failed to create gym class with title: {}", classRequest.title(), e);
-            throw e;
+            throw new RuntimeException("Failed to create class: " + e.getMessage(), e);
         }
     }
 
@@ -121,7 +119,6 @@ public class ClassServiceImpl implements ClassService {
             gymClass.setCoach(newCoach);
         }
 
-        // Validate workout IDs
         List<Workout> workouts = classRequest.workoutIds().stream()
                 .map(workoutId -> workoutRepository.findById(workoutId)
                         .orElseThrow(() -> new ResourceNotFoundException("Workout not found with id: " + workoutId)))
@@ -135,8 +132,7 @@ public class ClassServiceImpl implements ClassService {
         gymClass.setCapacity(classRequest.capacity());
         gymClass.setWorkouts(workouts);
 
-        // Update list of images
-        gymClass.getImages().clear(); // Clear existing images to avoid persistence issues
+        gymClass.getImages().clear();
         List<Image> images = classRequest.imageUrls() != null
                 ? classRequest.imageUrls().stream()
                 .filter(url -> url != null && !url.trim().isEmpty())
@@ -145,7 +141,7 @@ public class ClassServiceImpl implements ClassService {
                     image.setUrl(url);
                     return image;
                 })
-                .collect(Collectors.toList())
+                .toList()
                 : List.of();
         gymClass.getImages().addAll(images);
 
@@ -155,7 +151,7 @@ public class ClassServiceImpl implements ClassService {
             return new ClassResponse(savedClass);
         } catch (Exception e) {
             logger.error("Failed to update gym class with id: {}", id, e);
-            throw e;
+            throw new RuntimeException("Failed to update class: " + e.getMessage(), e);
         }
     }
 

@@ -115,9 +115,7 @@ public class MembershipServiceImpl implements MembershipService {
         if (!repository.existsById(id)) {
             throw new ResourceNotFoundException("Membership not found with id: " + id);
         }
-        if (repository.isMembershipAssigned(id)) {
-            throw new IllegalStateException("Cannot delete membership assigned to a user");
-        }
+        // Remove the membership assignment check
         repository.deleteById(id);
     }
 }

@@ -1,6 +1,7 @@
 package com.example.demo.service.impl;
 
 import com.example.demo.dto.request.CreateUserDto;
+import com.example.demo.dto.request.UpdateUserDto;
 import com.example.demo.dto.response.UserResponse;
 import com.example.demo.model.enums.Role;
 import com.example.demo.exception.ResourceNotFoundException;
@@ -20,16 +21,16 @@ import java.util.stream.Collectors;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final MembershipRepository membershipRepository;
+    //private final MembershipRepository membershipRepository;
     private final PasswordEncoder passwordEncoder;
 
     public UserServiceImpl(
             UserRepository userRepository,
-            MembershipRepository membershipRepository,
+            //MembershipRepository membershipRepository,
             PasswordEncoder passwordEncoder
     ) {
         this.userRepository = userRepository;
-        this.membershipRepository = membershipRepository;
+        //this.membershipRepository = membershipRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -59,29 +60,32 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("Email already taken: " + dto.getEmail());
         }
 
-        Membership membership = null;
-        if (dto.getMembershipId() != null) {
-            membership = membershipRepository.findById(dto.getMembershipId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Membership not found with id: " + dto.getMembershipId()));
-            if (membershipRepository.isMembershipAssigned(dto.getMembershipId())) {
-                throw new IllegalStateException("Membership already assigned to another user");
-            }
-        }
+//        Membership membership = null;
+//        if (dto.getMembershipId() != null) {
+//            membership = membershipRepository.findById(dto.getMembershipId())
+//                    .orElseThrow(() -> new ResourceNotFoundException("Membership not found with id: " + dto.getMembershipId()));
+//            if (membershipRepository.isMembershipAssigned(dto.getMembershipId())) {
+//                throw new IllegalStateException("Membership already assigned to another user");
+//            }
+//        }
 
         User user = new User();
         user.setUsername(dto.getUsername());
         user.setEmail(dto.getEmail());
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
         user.setRole(dto.getRole() != null ? dto.getRole() : Role.USER);
-        user.setMembership(membership);
-        user.setProfileImageUrl(dto.getProfileImageUrl());
-
+        //user.setMembership(membership);
+        user.setProfileImageUrl(
+                dto.getProfileImageUrl() != null ?
+                        dto.getProfileImageUrl() :
+                        "" // Default to empty string
+        );
         return new UserResponse(userRepository.save(user));
     }
 
     @Override
     @Transactional
-    public UserResponse update(Long id, CreateUserDto dto) {
+    public UserResponse update(Long id, UpdateUserDto dto) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
 
@@ -98,17 +102,17 @@ public class UserServiceImpl implements UserService {
             user.setPassword(passwordEncoder.encode(dto.getPassword()));
         }
         user.setRole(dto.getRole() != null ? dto.getRole() : Role.USER);
-        if (dto.getMembershipId() != null) {
-            Membership membership = membershipRepository.findById(dto.getMembershipId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Membership not found with id: " + dto.getMembershipId()));
-            if (!membership.getId().equals(user.getMembership() != null ? user.getMembership().getId() : null) &&
-                    membershipRepository.isMembershipAssigned(dto.getMembershipId())) {
-                throw new IllegalStateException("Membership already assigned to another user");
-            }
-            user.setMembership(membership);
-        } else {
-            user.setMembership(null);
-        }
+//        if (dto.getMembershipId() != null) {
+//            Membership membership = membershipRepository.findById(dto.getMembershipId())
+//                    .orElseThrow(() -> new ResourceNotFoundException("Membership not found with id: " + dto.getMembershipId()));
+//            if (!membership.getId().equals(user.getMembership() != null ? user.getMembership().getId() : null) &&
+//                    membershipRepository.isMembershipAssigned(dto.getMembershipId())) {
+//                throw new IllegalStateException("Membership already assigned to another user");
+//            }
+//            user.setMembership(membership);
+//        } else {
+//            user.setMembership(null);
+//        }
         user.setProfileImageUrl(dto.getProfileImageUrl());
 
         return new UserResponse(userRepository.save(user));
@@ -130,5 +134,14 @@ public class UserServiceImpl implements UserService {
             throw new ResourceNotFoundException("User not found with id: " + id);
         }
         userRepository.deleteById(id);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<UserResponse> getCoaches() {
+        return userRepository.findByRole(Role.COACH)
+                .stream()
+                .map(UserResponse::new)
+                .collect(Collectors.toList());
     }
 }

@@ -9,8 +9,8 @@ public class UserResponse {
     private final String username;
     private final String email;
     private final String role;
-    private final Long membershipId;
-    private final String membershipType;
+    //private final Long membershipId;
+    //private final String membershipType;
     private final String profileImageUrl;
 
     public UserResponse(User u) {
@@ -18,8 +18,8 @@ public class UserResponse {
         this.username = u.getUsername();
         this.email = u.getEmail();
         this.role = u.getRole().name();
-        this.membershipId = (u.getMembership() != null ? u.getMembership().getId() : null);
-        this.membershipType = (u.getMembership() != null ? u.getMembership().getType().name() : null);
+        //this.membershipId = (u.getMembership() != null ? u.getMembership().getId() : null);
+        //this.membershipType = (u.getMembership() != null ? u.getMembership().getType().name() : null);
         this.profileImageUrl = u.getProfileImageUrl();
     }
 }

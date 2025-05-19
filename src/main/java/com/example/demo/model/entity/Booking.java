@@ -1,10 +1,9 @@
-// src/main/java/com/example/demo/model/entity/Booking.java
 package com.example.demo.model.entity;
 
 import com.example.demo.model.enums.BookingStatus;
 import jakarta.persistence.*;
 import lombok.*;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 @Entity
 @Table(name = "bookings")
@@ -26,5 +25,5 @@ public class Booking {
     private BookingStatus status;
 
     @Column(nullable = false)
-    private LocalDateTime bookingDate;
+    private ZonedDateTime bookingDate;
 }
