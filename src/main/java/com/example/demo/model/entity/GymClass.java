@@ -3,7 +3,7 @@ package com.example.demo.model.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.*;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,10 +31,10 @@ public class GymClass {
     private List<Image> images = new ArrayList<>();
 
     @Column(nullable = false)
-    private LocalDateTime startTime;
+    private ZonedDateTime startTime;
 
     @Column(nullable = false)
-    private LocalDateTime endTime;
+    private ZonedDateTime endTime;
 
     @Column(nullable = false)
     private Integer duration; // in minutes

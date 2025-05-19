@@ -6,6 +6,7 @@ import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "gym_products")
@@ -64,19 +65,44 @@ public class GymProduct {
         this.price = productRequest.price();
         this.stock = productRequest.stock();
 
-        // Clear existing images to avoid persistence issues
-        this.images.clear();
+        // More efficient image update strategy
+        if (productRequest.imageUrls() == null || productRequest.imageUrls().isEmpty()) {
+            // Clear all images if new list is empty
+            this.images.clear();
+        } else {
+            // Get new image URLs
+            List<String> newUrls = productRequest.imageUrls().stream()
+                    .filter(url -> url != null && !url.trim().isEmpty())
+                    .toList();
 
-        // Add new images
-        List<Image> images = productRequest.imageUrls() != null ?
-                productRequest.imageUrls().stream()
-                        .filter(url -> url != null && !url.trim().isEmpty())
-                        .map(url -> {
-                            Image image = new Image();
-                            image.setUrl(url);
-                            return image;
-                        })
-                        .toList() : new ArrayList<>();
-        this.images.addAll(images);
+            // Remove images that are not in the new list
+            this.images.removeIf(image -> !newUrls.contains(image.getUrl()));
+
+            // Add new images that don't exist yet
+            List<String> existingUrls = this.images.stream()
+                    .map(Image::getUrl)
+                    .toList();
+
+            newUrls.stream()
+                    .filter(url -> !existingUrls.contains(url))
+                    .forEach(url -> {
+                        Image image = new Image();
+                        image.setUrl(url);
+                        this.images.add(image);
+                    });
+        }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        GymProduct that = (GymProduct) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

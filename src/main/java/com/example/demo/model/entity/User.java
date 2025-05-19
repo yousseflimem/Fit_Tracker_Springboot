@@ -34,12 +34,12 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private Role role;
 
-    @Column
+    @Column(name = "profile_image_url")
     private String profileImageUrl;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "membership_id")
-    private Membership membership;
+//    @OneToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "membership_id")
+//    private Membership membership;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Booking> bookings;

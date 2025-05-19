@@ -7,25 +7,22 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class CreateUserDto {
+public class UpdateUserDto {
     @NotBlank(message = "Username is required")
-    @Size(min = 3, max = 50)
+    @Size(min = 3, max = 50, message = "Username must be between 3 and 50 characters")
     private String username;
 
     @NotBlank(message = "Email is required")
-    @Email
+    @Email(message = "Email must be valid")
     private String email;
 
-    @NotBlank(message = "Password is required")
-    @Size(min = 6)
-    private String password;
+    @Size(min = 6, message = "Password must be at least 6 characters")
+    private String password; // Make password optional
 
-    @NotNull(message = "Role is required")
     private Role role;
-
     //private Long membershipId;
 
-    @Pattern(regexp = "^(https?://.*\\.(?:png|jpg|jpeg|gif))?$",
+    @Pattern(regexp = "^(https?://.*\\.(?:png|jpg|jpeg|gif))$|^$",
             message = "Profile image URL must be a valid image URL or empty")
-    private String profileImageUrl="";
+    private String profileImageUrl;
 }

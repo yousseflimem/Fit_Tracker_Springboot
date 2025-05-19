@@ -46,6 +46,6 @@ public class Membership {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    @OneToOne(mappedBy = "membership", fetch = FetchType.LAZY)
-    private User user; // Clarify relationship
+    //@OneToOne(mappedBy = "membership", fetch = FetchType.LAZY)
+    // private User user; // Clarify relationship
 }

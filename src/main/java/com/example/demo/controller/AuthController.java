@@ -1,6 +1,6 @@
 package com.example.demo.controller;
 
-import com.example.demo.dto.response.UserResponse;
+import com.example.demo.exception.ResourceNotFoundException;
 import com.example.demo.model.enums.Role;
 import com.example.demo.model.entity.User;
 import com.example.demo.repository.UserRepository;
@@ -15,6 +15,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -77,8 +78,11 @@ public class AuthController {
             );
             SecurityContextHolder.getContext().setAuthentication(authentication);
             String jwt = jwtUtils.generateJwtToken(authentication);
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            User user = userRepository.findByUsername(userDetails.getUsername())
+                    .orElseThrow(() -> new ResourceNotFoundException("User not found: " + userDetails.getUsername()));
             logger.info("User authenticated: {}", request.username());
-            return ResponseEntity.ok(new AuthResponse(jwt));
+            return ResponseEntity.ok(new AuthResponse(jwt, user.getId(), user.getRole().name(), user.getUsername()));
         } catch (AuthenticationException e) {
             logger.error("Authentication failed for user {}: {}", request.username(), e.getMessage());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ErrorResponse("Invalid credentials"));
@@ -88,14 +92,6 @@ public class AuthController {
     @GetMapping("/test-encode")
     public String testEncode(@RequestParam String raw) {
         return passwordEncoder.encode(raw);
-    }
-
-    @GetMapping("/me")
-    public UserResponse getCurrentUser(Authentication authentication) {
-        String username = authentication.getName();
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        return new UserResponse(user);
     }
 
     public record RegisterRequest(
@@ -109,7 +105,7 @@ public class AuthController {
             @NotBlank(message = "Password is required") String password
     ) {}
 
-    public record AuthResponse(String token) {}
+    public record AuthResponse(String token, Long userId, String role, String username) {}
 
     public record ErrorResponse(String message) {}
 

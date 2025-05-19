@@ -3,14 +3,14 @@ package com.example.demo.dto.response;
 import com.example.demo.model.entity.Booking;
 import com.example.demo.model.enums.BookingStatus;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 public record BookingResponse(
         Long id,
         Long userId,
         Long classId,
         String classTitle,
-        LocalDateTime bookingDate,
+        ZonedDateTime bookingDate,
         BookingStatus status
 ) {
     public BookingResponse(Booking booking) {

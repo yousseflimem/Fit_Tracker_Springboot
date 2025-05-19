@@ -9,12 +9,9 @@ import com.example.demo.repository.BookingRepository;
 import com.example.demo.repository.ClassRepository;
 import com.example.demo.repository.OrderRepository;
 import com.example.demo.repository.WorkoutRepository;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.Jwts;
+import com.example.demo.security.services.UserDetailsImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,9 +25,6 @@ public class SecurityService {
     private final ClassRepository classRepository;
     private final WorkoutRepository workoutRepository;
     private final OrderRepository orderRepository;
-
-    @Value("${app.jwt.secret}")
-    private String jwtSecret;
 
     public SecurityService(
             BookingRepository bookingRepository,
@@ -88,28 +82,11 @@ public class SecurityService {
             logger.warn("Authentication is null or not authenticated");
             return null;
         }
-        try {
-            String jwt = (String) authentication.getCredentials();
-            if (jwt == null) {
-                logger.warn("JWT token is null in authentication credentials");
-                return null;
-            }
-            Claims claims = Jwts.parser()
-                    .setSigningKey(jwtSecret)
-                    .parseClaimsJws(jwt)
-                    .getBody();
-            Object userId = claims.get("userId");
-            if (userId == null) {
-                logger.warn("userId claim is missing in JWT");
-                return null;
-            }
-            if (userId instanceof Integer) {
-                return ((Integer) userId).longValue();
-            }
-            return (Long) userId;
-        } catch (JwtException e) {
-            logger.error("Failed to parse JWT: {}", e.getMessage(), e);
-            return null;
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof UserDetailsImpl) {
+            return ((UserDetailsImpl) principal).getId();
         }
+        logger.warn("Principal is not an instance of UserDetailsImpl");
+        return null;
     }
 }

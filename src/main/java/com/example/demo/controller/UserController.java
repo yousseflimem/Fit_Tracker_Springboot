@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.dto.request.CreateUserDto;
+import com.example.demo.dto.request.UpdateUserDto;
 import com.example.demo.dto.response.UserResponse;
 import com.example.demo.model.enums.Role;
 import com.example.demo.service.SecurityService;
@@ -46,6 +47,12 @@ public class UserController {
         return userService.getById(userId);
     }
 
+    @GetMapping("/coaches")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('COACH') or hasRole('USER')")
+    public List<UserResponse> getCoaches() {
+        return userService.getCoaches();
+    }
+
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public UserResponse create(@Valid @RequestBody CreateUserDto dto) {
@@ -54,7 +61,7 @@ public class UserController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or @securityService.isUser(#id, authentication)")
-    public UserResponse update(@PathVariable Long id, @Valid @RequestBody CreateUserDto dto) {
+    public UserResponse update(@PathVariable Long id, @Valid @RequestBody UpdateUserDto dto) {
         return userService.update(id, dto);
     }
 

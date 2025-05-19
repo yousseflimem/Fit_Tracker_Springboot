@@ -18,7 +18,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -49,7 +50,9 @@ public class BookingServiceImpl implements BookingService {
                 .orElseThrow(() -> new ResourceNotFoundException("Class not found with id: " + request.classId()));
 
         // Validate booking date
-        LocalDateTime bookingDate = request.bookingDate() != null ? request.bookingDate() : LocalDateTime.now();
+        ZonedDateTime bookingDate = request.bookingDate() != null
+                ? request.bookingDate()
+                : ZonedDateTime.now(ZoneId.of("UTC"));
         if (bookingDate.isAfter(gymClass.getStartTime())) {
             throw new IllegalStateException("Cannot book a class that has already started.");
         }
@@ -77,6 +80,7 @@ public class BookingServiceImpl implements BookingService {
         }
         return bookingRepository.countByGymClassIdAndStatusNot(classId, BookingStatus.CANCELLED);
     }
+
     @Override
     @Transactional(readOnly = true)
     public Page<BookingResponse> getAll(int page, int size) {
@@ -119,7 +123,9 @@ public class BookingServiceImpl implements BookingService {
         booking.setGymClass(gymClass);
         booking.setUser(user);
         booking.setStatus(request.status() != null ? request.status() : BookingStatus.PENDING);
-        booking.setBookingDate(request.bookingDate() != null ? request.bookingDate() : LocalDateTime.now());
+        booking.setBookingDate(request.bookingDate() != null
+                ? request.bookingDate()
+                : ZonedDateTime.now(ZoneId.of("UTC")));
 
         return new BookingResponse(bookingRepository.save(booking));
     }

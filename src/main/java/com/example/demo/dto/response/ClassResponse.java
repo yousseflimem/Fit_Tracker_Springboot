@@ -4,7 +4,7 @@ import com.example.demo.model.entity.GymClass;
 import com.example.demo.model.entity.Image;
 import com.example.demo.model.entity.Workout;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -13,8 +13,8 @@ public record ClassResponse(
         String title,
         String category,
         String description,
-        LocalDateTime startTime,
-        LocalDateTime endTime,
+        ZonedDateTime startTime,
+        ZonedDateTime endTime,
         Integer duration,
         Integer capacity,
         Long coachId,
@@ -34,12 +34,12 @@ public record ClassResponse(
                 gymClass.getCapacity(),
                 gymClass.getCoach().getId(),
                 gymClass.getCoach().getUsername(),
-                gymClass.getImages().stream()
-                        .map(Image::getUrl)
-                        .collect(Collectors.toList()),
-                gymClass.getWorkouts().stream()
-                        .map(Workout::getId)
-                        .collect(Collectors.toList())
+                gymClass.getImages() != null
+                        ? gymClass.getImages().stream().map(Image::getUrl).collect(Collectors.toList())
+                        : List.of(),
+                gymClass.getWorkouts() != null
+                        ? gymClass.getWorkouts().stream().map(Workout::getId).collect(Collectors.toList())
+                        : List.of()
         );
     }
 }
