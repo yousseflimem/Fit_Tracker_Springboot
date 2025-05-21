@@ -13,5 +13,5 @@ public record ProductRequest(
         @Min(value = 0, message = "Stock cannot be negative") Integer stock,
         @NotEmpty(message = "At least one image URL is required")
         @Size(min = 1, max = 5, message = "Image URLs must be between 1 and 5")
-        List<@Pattern(regexp = "^(https?://.*\\.(?:png|jpg|jpeg|gif))$", message = "Invalid image URL") String> imageUrls
+        List<String> imageUrls  // Removed @Pattern constraint
 ) {}

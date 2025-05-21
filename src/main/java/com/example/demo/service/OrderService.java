@@ -12,4 +12,6 @@ public interface OrderService {
     OrderResponse create(OrderRequest request, Long userId, Authentication authentication);
     OrderResponse update(Long id, OrderRequest request, Long userId, Authentication authentication);
     void deleteOrder(Long id);
+    OrderResponse updateStatus(Long id, String status, Authentication authentication);
+
 }

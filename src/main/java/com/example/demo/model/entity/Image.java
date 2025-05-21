@@ -7,7 +7,7 @@ import jakarta.validation.constraints.NotBlank;
 @Embeddable
 public class Image {
     @NotBlank(message = "Image URL is required")
-    @Column(name = "url", nullable = false)
+    @Column(name = "url", nullable = false, length = 2048)
     private String url;
 
     @Column(name = "description")

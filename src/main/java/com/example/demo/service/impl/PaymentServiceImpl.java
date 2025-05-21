@@ -71,6 +71,10 @@ public class PaymentServiceImpl implements PaymentService {
         payment.setAmount(request.amount());
         payment.setPaymentDate(request.paymentDate());
         payment.setStatus(Payment.PaymentStatus.valueOf(request.status()));
+        // New fields: method and card last four
+        payment.setPaymentMethod("CARD");
+        String full = request.cardNumber().replaceAll("\\s+", "");
+        payment.setCardLast4(full.substring(full.length() - 4));
 
         paymentRepository.save(payment);
         return toPaymentResponse(payment);
@@ -90,6 +94,9 @@ public class PaymentServiceImpl implements PaymentService {
         payment.setAmount(request.amount());
         payment.setPaymentDate(request.paymentDate());
         payment.setStatus(Payment.PaymentStatus.valueOf(request.status()));
+        payment.setPaymentMethod("CARD");
+        String full = request.cardNumber().replaceAll("\\s+", "");
+        payment.setCardLast4(full.substring(full.length() - 4));
 
         paymentRepository.save(payment);
         return toPaymentResponse(payment);
@@ -115,7 +122,9 @@ public class PaymentServiceImpl implements PaymentService {
                 payment.getOrder().getId(),
                 payment.getAmount(),
                 payment.getPaymentDate(),
-                payment.getStatus().name()
+                payment.getStatus().name(),
+                payment.getPaymentMethod(),
+                payment.getCardLast4()
         );
     }
 }

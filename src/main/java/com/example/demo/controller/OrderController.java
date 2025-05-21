@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.dto.request.OrderRequest;
+import com.example.demo.dto.request.StatusUpdateRequest;
 import com.example.demo.dto.response.OrderResponse;
 import com.example.demo.service.OrderService;
 import com.example.demo.service.SecurityService;
@@ -36,6 +37,17 @@ public class OrderController {
             throw new IllegalStateException("Authenticated user ID not found");
         }
         return orderService.create(orderRequest, userId, authentication);
+    }
+
+    @PutMapping("/{id}/status")
+    @PreAuthorize("hasRole('ADMIN') or @securityService.isOrderOwner(#id, authentication)")
+    public OrderResponse updateStatus(
+            @PathVariable Long id,
+            @Valid @RequestBody StatusUpdateRequest req,
+            Authentication authentication
+    ) {
+        // delegate to service, which will check ownership/admin again
+        return orderService.updateStatus(id, req.status(), authentication);
     }
 
     @PutMapping("/{id}")

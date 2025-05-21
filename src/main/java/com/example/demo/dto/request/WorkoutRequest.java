@@ -9,6 +9,5 @@ public record WorkoutRequest(
         String description,
         @Positive(message = "Duration must be positive") Integer durationInMinutes,
         @NotNull(message = "Coach ID is required") Long coachId,
-        @NotEmpty(message = "At least one image URL is required")
         List<String> imageUrls
 ) { }

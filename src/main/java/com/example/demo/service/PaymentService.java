@@ -9,7 +9,7 @@ public interface PaymentService {
     Page<PaymentResponse> getAllPayments(int page, int size);
     Page<PaymentResponse> getPaymentsByUserId(Long userId, int page, int size);
     PaymentResponse getPaymentById(Long id);
-    PaymentResponse createPayment(PaymentRequest paymentRequest, Long userId, Authentication authentication);
-    PaymentResponse updatePayment(Long id, PaymentRequest paymentRequest, Long userId, Authentication authentication);
-    void deletePayment(Long id, Long userId, Authentication authentication);
+    PaymentResponse createPayment(PaymentRequest request, Long userId, Authentication auth);
+    PaymentResponse updatePayment(Long id, PaymentRequest request, Long userId, Authentication auth);
+    void deletePayment(Long id, Long userId, Authentication auth);
 }

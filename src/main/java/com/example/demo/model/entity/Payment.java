@@ -32,6 +32,12 @@ public class Payment {
     @Column(nullable = false)
     private PaymentStatus status;
 
+    @Column(length = 4)
+    private String cardLast4;          // store only last 4 digits
+
+    @Column(nullable = false)
+    private String paymentMethod;
+
     public enum PaymentStatus {
         PENDING, COMPLETED, FAILED
     }

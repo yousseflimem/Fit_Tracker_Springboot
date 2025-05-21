@@ -7,5 +7,7 @@ public record PaymentResponse(
         Long orderId,
         Double amount,
         LocalDateTime paymentDate,
-        String status
+        String status,
+        String paymentMethod,
+        String cardLast4
 ) { }
