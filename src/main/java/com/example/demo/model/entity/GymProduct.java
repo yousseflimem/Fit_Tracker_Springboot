@@ -45,15 +45,15 @@ public class GymProduct {
         gymProduct.setDescription(productRequest.description());
         gymProduct.setPrice(productRequest.price());
         gymProduct.setStock(productRequest.stock());
-        List<Image> images = productRequest.imageUrls() != null ?
-                productRequest.imageUrls().stream()
-                        .filter(url -> url != null && !url.trim().isEmpty())
-                        .map(url -> {
-                            Image image = new Image();
-                            image.setUrl(url);
-                            return image;
-                        })
-                        .toList() : new ArrayList<>();
+        List<Image> images = productRequest.imageUrls().stream()
+                .filter(url -> url != null && !url.trim().isEmpty())
+                .map(url -> {
+                    Image image = new Image();
+                    image.setUrl(url);
+                    return image;
+                })
+                .toList();
+
         gymProduct.setImages(images);
         return gymProduct;
     }

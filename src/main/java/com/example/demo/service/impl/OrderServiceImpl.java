@@ -66,7 +66,6 @@ public class OrderServiceImpl implements OrderService {
     public OrderResponse create(OrderRequest request, Long userId, Authentication authentication) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
-
         Order order = new Order();
         order.setUser(user);
         order.setOrderDate(LocalDateTime.now());
@@ -76,8 +75,7 @@ public class OrderServiceImpl implements OrderService {
 
         double total = processOrderItems(request.items(), savedOrder);
         savedOrder.setTotalAmount(total);
-        savedOrder.setStatus(OrderStatus.COMPLETED);
-        orderRepository.save(savedOrder);
+        orderRepository.save(savedOrder); // Stays PENDING
 
         return toOrderResponse(savedOrder);
     }
