@@ -55,7 +55,7 @@ public class ProductController {
             List<String> errors = bindingResult.getFieldErrors()
                     .stream()
                     .map(error -> error.getField() + ": " + error.getDefaultMessage())
-                    .collect(Collectors.toList());
+                    .toList();
             return ResponseEntity.badRequest().body(Map.of("errors", errors));
         }
 

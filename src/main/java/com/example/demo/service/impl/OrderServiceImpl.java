@@ -8,6 +8,7 @@ import com.example.demo.model.entity.*;
 import com.example.demo.model.enums.OrderStatus;
 import com.example.demo.repository.*;
 import com.example.demo.service.OrderService;
+import com.example.demo.service.SecurityService;
 import com.example.demo.util.PaginationUtil;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -26,17 +27,20 @@ public class OrderServiceImpl implements OrderService {
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
     private final OrderItemRepository orderItemRepository;
+    private final SecurityService securityService;
 
     public OrderServiceImpl(
             OrderRepository orderRepository,
             UserRepository userRepository,
             ProductRepository productRepository,
-            OrderItemRepository orderItemRepository
+            OrderItemRepository orderItemRepository,
+            SecurityService securityService
     ) {
         this.orderRepository = orderRepository;
         this.userRepository = userRepository;
         this.productRepository = productRepository;
         this.orderItemRepository = orderItemRepository;
+        this.securityService = securityService;
     }
 
     @Override
@@ -107,6 +111,26 @@ public class OrderServiceImpl implements OrderService {
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found with id: " + id));
         orderItemRepository.deleteAll(order.getItems());
         orderRepository.delete(order);
+    }
+
+    @Override
+    @Transactional
+    public OrderResponse updateStatus(Long id, String status, Authentication authentication) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found with id: " + id));
+
+        // Only owner or admin can change status
+        if (!securityService.isOrderOwner(id, authentication)
+                && authentication.getAuthorities().stream().noneMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
+            throw new SecurityException("Not authorized to change order status");
+        }
+
+        // Validate status
+        OrderStatus newStatus = OrderStatus.valueOf(status);
+        order.setStatus(newStatus);
+        orderRepository.save(order);
+
+        return toOrderResponse(order);
     }
 
     private double processOrderItems(List<OrderRequest.OrderItemRequest> itemRequests, Order order) {
