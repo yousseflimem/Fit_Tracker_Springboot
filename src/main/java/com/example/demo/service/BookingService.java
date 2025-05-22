@@ -13,4 +13,5 @@ public interface BookingService {
     BookingResponse update(Long id, BookingRequest request);
     void delete(Long id);
     long getActiveBookingsCount(Long classId); // New method
+    List<BookingResponse> getByClassId(Long classId);
 }

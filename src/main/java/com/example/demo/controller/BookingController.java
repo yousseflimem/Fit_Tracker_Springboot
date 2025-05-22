@@ -22,6 +22,12 @@ public class BookingController {
         this.bookingService = bookingService;
     }
 
+    @GetMapping("/class/{classId}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('Coach')")
+    public List<BookingResponse> getBookingsByClass(@PathVariable Long classId) {
+        return bookingService.getByClassId(classId);
+    }
+
     @PostMapping
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public BookingResponse createBooking(@Valid @RequestBody BookingRequest request) {
@@ -44,7 +50,7 @@ public class BookingController {
     }
 
     @GetMapping("/user/{userId}")
-    @PreAuthorize("hasRole('ADMIN') or @securityService.isUser(#userId)")
+    @PreAuthorize("hasRole('ADMIN') ")
     public List<BookingResponse> getBookingsByUser(@PathVariable Long userId) {
         return bookingService.getByUserId(userId);
     }

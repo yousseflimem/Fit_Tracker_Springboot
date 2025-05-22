@@ -32,6 +32,15 @@ public class ReviewController {
         return reviewService.getReviewsByWorkout(workoutId, page, size);
     }
 
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public Page<ReviewResponse> getAllReviews(
+            @RequestParam(defaultValue = "0") @Min(0) int page,
+            @RequestParam(defaultValue = "10") @Min(1) int size
+    ) {
+        return reviewService.getAllReviews(page, size);
+    }
+
     @GetMapping("/user")
     @PreAuthorize("isAuthenticated()")
     public Page<ReviewResponse> getUserReviews(
