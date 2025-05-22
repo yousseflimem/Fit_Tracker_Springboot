@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,7 +28,6 @@ public class ReviewServiceImpl implements ReviewService {
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
     private final WorkoutRepository workoutRepository;
-    private final SecurityService securityService;
 
     public ReviewServiceImpl(
             ReviewRepository reviewRepository,
@@ -38,43 +38,46 @@ public class ReviewServiceImpl implements ReviewService {
         this.reviewRepository = reviewRepository;
         this.userRepository = userRepository;
         this.workoutRepository = workoutRepository;
-        this.securityService = securityService;
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page<ReviewResponse> getReviewsByWorkout(Long workoutId, int page, int size) {
-        logger.debug("Fetching reviews for workout id: {}, page: {}, size: {}", workoutId, page, size);
         if (!workoutRepository.existsById(workoutId)) {
-            logger.warn("Workout not found with id: {}", workoutId);
             throw new ResourceNotFoundException("Workout not found with id: " + workoutId);
         }
         if (page < 0 || size <= 0) {
-            logger.warn("Invalid pagination parameters - page: {}, size: {}", page, size);
             throw new IllegalArgumentException("Page must be non-negative and size must be positive");
         }
-        PageRequest pageRequest = PaginationUtil.createPageRequest(page, size, "createdAt");
-        Page<Review> reviews = reviewRepository.findByWorkoutId(workoutId, pageRequest);
-        logger.info("Retrieved {} reviews for workout id: {}", reviews.getTotalElements(), workoutId);
-        return reviews.map(ReviewResponse::new);
+        // Use Spring's PageRequest directly
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        return reviewRepository
+                .findByWorkoutId(workoutId, pageRequest)
+                .map(ReviewResponse::new);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<ReviewResponse> getAllReviews(int page, int size) {
+        if (page < 0 || size <= 0) {
+            throw new IllegalArgumentException("Page must be non-negative and size must be positive");
+        }
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        return reviewRepository.findAll(pageRequest).map(ReviewResponse::new);
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page<ReviewResponse> getReviewsByUserId(Long userId, int page, int size) {
-        logger.debug("Fetching reviews for user id: {}, page: {}, size: {}", userId, page, size);
         if (!userRepository.existsById(userId)) {
-            logger.warn("User not found with id: {}", userId);
             throw new ResourceNotFoundException("User not found with id: " + userId);
         }
         if (page < 0 || size <= 0) {
-            logger.warn("Invalid pagination parameters - page: {}, size: {}", page, size);
             throw new IllegalArgumentException("Page must be non-negative and size must be positive");
         }
-        PageRequest pageRequest = PaginationUtil.createPageRequest(page, size, "createdAt");
-        Page<Review> reviews = reviewRepository.findByUserId(userId, pageRequest);
-        logger.info("Retrieved {} reviews for user id: {}", reviews.getTotalElements(), userId);
-        return reviews.map(ReviewResponse::new);
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by("createdAt").descending());
+        return reviewRepository.findByUserId(userId, pageRequest)
+                .map(ReviewResponse::new);
     }
 
     @Override

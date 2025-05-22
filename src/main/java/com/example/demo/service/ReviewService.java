@@ -10,4 +10,5 @@ public interface ReviewService {
     Page<ReviewResponse> getReviewsByUserId(Long userId, int page, int size);
     ReviewResponse createReview(ReviewRequest request, Long userId, Authentication authentication);
     void deleteReview(Long id, Long userId, Authentication authentication);
+    Page<ReviewResponse> getAllReviews(int page, int size);
 }

@@ -20,7 +20,7 @@ public record ClassResponse(
         Long coachId,
         String coachName,
         List<String> imageUrls,
-        List<Long> workoutIds
+        List<WorkoutSummary> workouts
 ) {
     public ClassResponse(GymClass gymClass) {
         this(
@@ -37,9 +37,9 @@ public record ClassResponse(
                 gymClass.getImages() != null
                         ? gymClass.getImages().stream().map(Image::getUrl).collect(Collectors.toList())
                         : List.of(),
-                gymClass.getWorkouts() != null
-                        ? gymClass.getWorkouts().stream().map(Workout::getId).collect(Collectors.toList())
-                        : List.of()
+                gymClass.getWorkouts().stream()
+                        .map(w -> new WorkoutSummary(w.getId(), w.getName(), w.getCategory()))
+                        .toList()
         );
     }
 }

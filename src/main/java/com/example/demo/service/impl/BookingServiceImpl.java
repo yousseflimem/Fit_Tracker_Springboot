@@ -42,6 +42,18 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public List<BookingResponse> getByClassId(Long classId) {
+        if (!classRepository.existsById(classId)) {
+            throw new ResourceNotFoundException("Class not found with id: " + classId);
+        }
+        return bookingRepository.findByGymClassId(classId)
+                .stream()
+                .map(BookingResponse::new)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     @Transactional
     public BookingResponse create(BookingRequest request) {
         User user = userRepository.findById(request.userId())

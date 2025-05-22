@@ -58,25 +58,31 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     @Transactional
     public PaymentResponse createPayment(PaymentRequest request, Long userId, Authentication authentication) {
+        // 1. Load the order
         Order order = orderRepository.findById(request.orderId())
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found with id: " + request.orderId()));
 
-        // Verify order ownership
+        // 2. Verify that the authenticated user owns this order
         if (!securityService.isOrderOwner(order.getId(), authentication)) {
             throw new SecurityException("You do not have permission to create a payment for this order");
         }
 
+        // 3. Build & save the Payment entity
         Payment payment = new Payment();
         payment.setOrder(order);
         payment.setAmount(request.amount());
         payment.setPaymentDate(request.paymentDate());
         payment.setStatus(Payment.PaymentStatus.valueOf(request.status()));
-        // New fields: method and card last four
         payment.setPaymentMethod("CARD");
         String full = request.cardNumber().replaceAll("\\s+", "");
         payment.setCardLast4(full.substring(full.length() - 4));
-
         paymentRepository.save(payment);
+
+        // 4. **Update the Order’s status to COMPLETED**
+        order.setStatus(com.example.demo.model.enums.OrderStatus.COMPLETED);
+        orderRepository.save(order);
+
+        // 5. Return the response DTO
         return toPaymentResponse(payment);
     }
 
